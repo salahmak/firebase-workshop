@@ -6,6 +6,10 @@ import {
     GoogleAuthProvider,
     signInWithPopup,
     FacebookAuthProvider,
+    RecaptchaVerifier,
+
+
+    signInWithPhoneNumber
 } from "firebase/auth";
 
 
@@ -15,6 +19,11 @@ const signupForm = document.querySelector("#sign-up");
 const signinForm = document.querySelector("#sign-in");
 const phoneSignupForm = document.querySelector("#phone-signup");
 const resetPwForm = document.querySelector("#reset-password");
+
+
+
+
+
 
 // sign up user
 // send email confirmation
@@ -102,6 +111,19 @@ const signUpWithGoogle = async () => {
     }
 };
 
+
+
+
+let captchaConfig = {
+    'size': 'invisible'
+}
+
+let captchaVerifier = new RecaptchaVerifier("phone-btn", captchaConfig, auth);
+let confirmationResult;
+
+
+
+
 const signUpWithPhoneNumber = async () => {
     const number = phoneSignupForm.phone.value;
 
@@ -109,10 +131,35 @@ const signUpWithPhoneNumber = async () => {
         alert("please enter the required fields");
         return;
     }
+
+
+    try {
+        confirmationResult = await signInWithPhoneNumber(auth, number, captchaVerifier)
+    
+        phoneSignupForm.code.disabled = false;
+        document.getElementById("phone-btn-confirm").disabled = false;
+        
+    } catch (error) {
+        alert(error.message)
+    }
+
+
 };
 
 const confirmVerificationCode = async () => {
     const code = phoneSignupForm.code.value;
+
+    try {
+        const result = await confirmationResult.confirm(code);
+
+        console.log(result.user);
+        
+    } catch (error) {
+        alert(error.message)
+    }
+
+
+
 };
 
 const resetPassword = async () => {
