@@ -1,4 +1,5 @@
 import { onAuthStateChanged, signOut } from "firebase/auth";
+import { collection, getDocs, updateDoc } from "firebase/firestore";
 import { db, auth } from "./firebase.js";
 
 
@@ -78,24 +79,24 @@ let questionsList = []
 // fetch questions from the database and display them
 const getQuestionsFromFirestore = async () => {
     // get quizes collection reference
-
+    const quizesColRef = collection(db, "quizes");
 
     // get the quizes docs
+    const snapshot = await getDocs(quizesColRef);
 
+    snapshot.docs.forEach(doc => {
+        questionsList.push(doc.data())
+    })
 
-    // add the received docs to questionsList array
 
 }
 
 
 getQuestionsFromFirestore().then(()=>{
     console.log(questionsList)
+
     displayQuestions(questionsList)
 })
-
-
-
-
 
 
 
