@@ -32,5 +32,5 @@ This is the repository of the workshop's content.
 ### Acknowledgments
 
 - Many thanks to GDSC ENSIA club for inviting me to host the workshop in ther WebCamp event.
-- Thanks to other 2 mentors and especially [Bouchbout Sami](https://github.com/BouchboutSami) for collaborating on making this workshop.
+- Thanks to the other mentors and especially [Bouchbout Sami](https://github.com/BouchboutSami) for collaborating on making this workshop.
 - I'd also like to thank the participants who never hesitated to ask questions and show interest.
