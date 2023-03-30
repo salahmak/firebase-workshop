@@ -1,3 +1,5 @@
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import {db, auth} from "./firebase.js"
 
 
 
@@ -25,6 +27,31 @@ const signUp = async () => {
     }
 
 
+    try {
+
+
+        console.log("before authentication: ", auth.currentUser)
+        
+        let credential = await createUserWithEmailAndPassword(auth, email, password);
+        
+        
+        console.log("after authentication: ", auth.currentUser)
+
+
+
+
+
+        
+    } catch (error) {
+        alert(error.message)
+    }
+
+    // asynchrounous
+
+    
+
+
+    console.log("smth")
 
 }
 
