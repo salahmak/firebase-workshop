@@ -27,7 +27,7 @@ This is the repository of the workshop's content.
 
 ### Slides
 
-- You can find the workshop's slides I've used in []()
+- You can find the workshop's slides I've used in [here](https://github.com/salahmak/firebase-workshop/raw/master/slides/WebCamp%20Firebase%20slides.pptx)
 
 ### Acknowledgments
 
