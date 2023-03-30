@@ -1,7 +1,7 @@
 import { db } from "./firebase";
-import { addDoc, collection } from "firebase/firestore";
+import { addDoc, collection, getDoc, getDocs, query, where,  } from "firebase/firestore";
 
-import data from "./data.js";
+import data from "./data";
 
 let addBtn = document.querySelector("#addBtn");
 
@@ -9,20 +9,16 @@ let addBtn = document.querySelector("#addBtn");
 // add the questions from data.js to the firestore
 // ONLY RUN ONCE
 const addQuestionsToFirestore = async () => {
+    let quizColRef = collection(db, "quizes");
 
 
-    // get reference to the quizes collection
-    const quizesColRef = collection(db, "quizes");
-
-    data.forEach( async (question) => {
-        await addDoc(quizesColRef, question);
+    data.forEach( async (question )=> {
+        await addDoc(quizColRef, question);
     })
-
-    console.log("data added")
-
 }
 
-//addQuestionsToFirestore();
+
+
 
 
 addBtn.addEventListener("click", async () => {
@@ -57,12 +53,31 @@ addBtn.addEventListener("click", async () => {
     }
 
 
+
     // TODO: add the question to the database
+    let quizColRef = collection(db, "quizes");
 
-    // get reference to the quizes collection
-    const quizesColRef = collection(db, "quizes");
 
-    await addDoc(quizesColRef, {
+
+    // checking if a question with the same title exists already or not
+
+    let q = query(quizColRef, where("title_question", "==", title));
+
+    let docsSnapshot = await getDocs(q);
+
+    if(docsSnapshot.docs.length > 0) {
+        // in this case, there are other questions witht the same title so we don't add
+
+        alert("a question with the same title already exists in the database");
+
+        return;
+    }
+
+
+
+    // adding the question
+    
+    await addDoc(quizColRef, {
         title_question: title,
         choices: choices,
         answer: correctAnswer

@@ -1,16 +1,20 @@
-import { onAuthStateChanged, signOut } from "firebase/auth";
-import { collection, getDocs, updateDoc } from "firebase/firestore";
-import { db, auth } from "./firebase.js";
+// import data from "./data.js";
+import { auth, db } from "./firebase.js";
+
+import { collection, addDoc, getDocs, query, where, getDoc, updateDoc, onSnapshot } from "firebase/firestore";
+import { onAuthStateChanged, signInWithCustomToken, signOut } from "firebase/auth";
 
 
 
-// check if we are authorized
-onAuthStateChanged(auth, (user)=>{
-    if(user === null) {     // if there is no logged in user
+// eck if user is signed in or not
+onAuthStateChanged(auth, async (user) => {
+
+    // if used is not signed in, redirect to login page
+    if(user === null) {   
         window.location = "/auth.html"
     }
-})
-
+    
+});
 
 
 
@@ -20,7 +24,7 @@ let originalcolor = "linear-gradient(to right, #2257e6, #477af5)";
 
 const btnSubmit = document.querySelector(".button-answer");
 
-
+// a function that displays the quiz's questions
 const displayQuestions = (data) => {
     data.forEach((element, i) => {
         let options = "";
@@ -52,54 +56,49 @@ const displayQuestions = (data) => {
     const Qcontainer = document.querySelector(".questions");
     Qcontainer.innerHTML = `${questions}\n`;
 
-
-
 }
 
 
 
-
-
-// TODO: implement signout
+// handling sign out 
 const signoutBtn = document.querySelector(".signout-btn")
 signoutBtn.addEventListener("click", async ()=>{
-    //sign out
-
     await signOut(auth);
-
-
 })
 
 
 
 
-// TODO: get questions list and display them
 let questionsList = []
 
-// fetch questions from the database and display them
+// fetch questions from the database and store them in the questionsList array
 const getQuestionsFromFirestore = async () => {
-    // get quizes collection reference
-    const quizesColRef = collection(db, "quizes");
 
-    // get the quizes docs
-    const snapshot = await getDocs(quizesColRef);
+    // getting a ref to the quizes collection
+    let quizColRef = collection(db, "quizes");
 
-    snapshot.docs.forEach(doc => {
+    // getting the all the docs inside the quizes collection
+    let quizDocs = await getDocs(quizColRef);
+
+    // getting the data of each doc and putting it in the array
+    quizDocs.docs.forEach(doc => {
         questionsList.push(doc.data())
     })
-
-
 }
 
-
+// executing the previous function
 getQuestionsFromFirestore().then(()=>{
     console.log(questionsList)
-
     displayQuestions(questionsList)
 })
 
 
 
+
+
+
+
+// handling clicking the submit button
 
 btnSubmit.addEventListener("click", async (e) => {
     const answers = document.querySelectorAll("div.card-body > select");
@@ -130,27 +129,24 @@ btnSubmit.addEventListener("click", async (e) => {
         }
 
 
+        // updating the score of the user
 
-        // TODO: update the user's score
+        let userColRef = collection(db, "users");
 
-        // get users collection reference
-
-
-
-        // setup query
+        // constructing a query (select * from users where email = auth.currentUser.email)
+        let q = query(userColRef, where("email" , "==", auth.currentUser.email));
 
 
+        // running the query and storing its results in resultSnapshot
+        let resultSnapshot = await getDocs(q);
 
-        // get results snapshot
+        // getting the reference of the first doc (corresponds to the current user document)
+        let userDocRef = resultSnapshot.docs[0].ref
 
-
-
-        // extract doc reference from result
-
-
-
-        // update the document
-        
+        // updating the user's doc with the new score value
+        await updateDoc(userDocRef, {
+            score: note
+        })
 
 
         window.scroll(0, 0);
@@ -160,3 +156,6 @@ btnSubmit.addEventListener("click", async (e) => {
         alert("Please answer all the questions");
     }
 });
+
+
+// Assignment: try to show the user's score somewhere on the page 

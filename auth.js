@@ -1,22 +1,7 @@
-import {
-    createUserWithEmailAndPassword,
-    onAuthStateChanged,
-    sendEmailVerification,
-    signInWithEmailAndPassword,
-    GoogleAuthProvider,
-    signInWithPopup,
-    FacebookAuthProvider,
-    RecaptchaVerifier,
+import { createUserWithEmailAndPassword, sendEmailVerification, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, RecaptchaVerifier, signInWithPhoneNumber, sendPasswordResetEmail, onAuthStateChanged } from "firebase/auth";
+import { addDoc, collection, waitForPendingWrites } from "firebase/firestore";
+import { auth, db } from "./firebase";
 
-
-    signInWithPhoneNumber,
-
-    sendPasswordResetEmail
-
-} from "firebase/auth";
-
-
-import { db, auth } from "./firebase.js";
 
 const signupForm = document.querySelector("#sign-up");
 const signinForm = document.querySelector("#sign-in");
@@ -26,186 +11,185 @@ const resetPwForm = document.querySelector("#reset-password");
 
 
 
-
-
 // sign up user
-// send email confirmation
-// TODO: add userinfo to database
+// send email confirmation email
+// add userinfo to database
 // redirect to /  (quiz page)
 const signUp = async () => {
-    const username = signupForm.username.value;
+    const username = signupForm.username.value
     const email = signupForm.email.value;
     const password = signupForm.password.value;
 
-    if (!email || !password || !username) {
+    if(!email || !password || !username) {
         alert("please enter the required fields");
         return;
     }
 
+
     try {
-        let credential = await createUserWithEmailAndPassword(
-            auth,
+
+        // sign up
+        let creds = await createUserWithEmailAndPassword(auth, email, password);
+
+
+        // add userinfo to database
+        let usersColRef = collection(db, "users");
+
+        await addDoc(usersColRef, {
+            id: creds.user.uid,
+            username: username,
             email,
-            password
-        );
+            score: 0
+        })
 
-        console.log("before verification: ", credential.user);
+        
+        // send confirmation email
+        await sendEmailVerification(creds.user);
+        
 
-        await sendEmailVerification(auth.currentUser);
+        alert("sign up with success")
 
-        onAuthStateChanged(auth, (user)=>{
-
-            if(user !== null) {
-                //redirect if user is authenticated
-                window.location = "/"
+        onAuthStateChanged(auth, async (user) => {
+            if(user) {
+                window.location = "/";
             }
-
         })
 
 
-        
-    } catch (error) {
-        alert(error.message);
+    }
+    catch (e) {
+        alert(e.message)
     }
 
-    // asynchrounous
+}
 
-    console.log("smth");
-};
 
 // sign in user
 // redirect to /  (quiz page)
-const signin = async () => {
+const signin =  async () => {
     const email = signinForm.email.value;
     const password = signinForm.password.value;
 
-    if (!email || !password) {
+    if(!email || !password) {
         alert("please enter the required fields");
         return;
     }
 
-    try {
-        let credential = await signInWithEmailAndPassword(
-            auth,
-            email,
-            password
-        );
 
-        onAuthStateChanged(auth, (user)=>{
-
-            if(user !== null) {
-                //redirect if user is authenticated
-                window.location = "/"
-            }
-
-        })
+    // sign up
+    await signInWithEmailAndPassword(auth, email, password);
 
 
-    } catch (error) {
-        alert(error.message);
-    }
-};
-
-const signUpWithGoogle = async () => {
-
-    const provider = new GoogleAuthProvider();
-
-    try {
-        await signInWithPopup(auth, provider);
-
-
-        onAuthStateChanged(auth, (user)=>{
-
-            if(user !== null) {
-                //redirect if user is authenticated
-                window.location = "/"
-            }
-
-        })
-
-        console.log("after google auth: ", auth.currentUser);
-    } catch (error) {
-        alert(error.message);
-    }
-};
+    alert("sign in with success")
 
 
 
+    onAuthStateChanged(auth, async (user) => {
+        if(user) {
+            window.location = "/";
+        }
+    })
 
-let captchaConfig = {
-    'size': 'invisible'
 }
 
-let captchaVerifier = new RecaptchaVerifier("phone-btn", captchaConfig, auth);
+
+
+const signUpWithGoogle = async () => {
+    const googleProvider = new GoogleAuthProvider();
+
+    signInWithPopup(auth, googleProvider).then(result => {
+
+        console.log(result.user);
+
+        
+        onAuthStateChanged(auth, async (user) => {
+            if(user) {
+                window.location = "/";
+            }
+        })
+
+    })
+}
+
+
+
+
+const captchaSettings = {
+    'size': 'invisible',
+};
+
+let recaptchaVerifier = new RecaptchaVerifier("phone-btn", captchaSettings, auth)
 let confirmationResult;
-
-
-
 
 const signUpWithPhoneNumber = async () => {
     const number = phoneSignupForm.phone.value;
 
-    if (!number) {
+    if(!number) {
         alert("please enter the required fields");
         return;
     }
 
 
     try {
-        confirmationResult = await signInWithPhoneNumber(auth, number, captchaVerifier)
-    
+
+        confirmationResult = await signInWithPhoneNumber(auth, number, recaptchaVerifier );
+
+
+        document.querySelector("#phone-btn-confirm").disabled = false;
         phoneSignupForm.code.disabled = false;
-        document.getElementById("phone-btn-confirm").disabled = false;
-        
+
+
+        onAuthStateChanged(auth, async (user) => {
+            if(user) {
+                window.location = "/";
+            }
+        })
+
+    
     } catch (error) {
-        alert(error.message)
+        alert(error.message)    
     }
+}
 
-
-};
 
 const confirmVerificationCode = async () => {
     const code = phoneSignupForm.code.value;
 
+
     try {
-        const result = await confirmationResult.confirm(code);
+        await confirmationResult.confirm(code);
+
+        alert("confirmed")
 
         
-        onAuthStateChanged(auth, (user)=>{
-
-            if(user !== null) {
-                //redirect if user is authenticated
-                window.location = "/"
-            }
-
-        })
-
-        console.log(result.user);
         
     } catch (error) {
         alert(error.message)
     }
 
 
+}
 
-};
 
 const resetPassword = async () => {
     const email = resetPwForm.email.value;
 
-    if (!email) {
+    if(!email) {
         alert("please enter the required fields");
         return;
     }
 
 
-    await sendPasswordResetEmail(auth, email);
+    try {
+        await sendPasswordResetEmail(auth, email);
 
-    alert("email sent")
-
-
-};
-
+        alert("password reset mail was sent")
+        
+    } catch (error) {
+        alert(error.message);
+    }
+    
+}
 
 
 
@@ -215,13 +199,7 @@ document.getElementById("signin-btn").addEventListener("click", signin);
 
 document.getElementById("google").addEventListener("click", signUpWithGoogle);
 
-document
-    .getElementById("phone-btn")
-    .addEventListener("click", signUpWithPhoneNumber);
-document
-    .getElementById("phone-btn-confirm")
-    .addEventListener("click", confirmVerificationCode);
+document.getElementById("phone-btn").addEventListener("click", signUpWithPhoneNumber);
+document.getElementById("phone-btn-confirm").addEventListener("click", confirmVerificationCode);
 
-document
-    .getElementById("reset-pw-btn")
-    .addEventListener("click", resetPassword);
+document.getElementById("reset-pw-btn").addEventListener("click", resetPassword);

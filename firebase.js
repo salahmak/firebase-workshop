@@ -2,40 +2,30 @@ import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 
-
 // Firebase config object, used to authenticate to the Firebase servers
 const firebaseConfig = {
+    apiKey: "AIzaSyC2h-iCj8QmAuvFIlzKZLl168Rchay1rRQ",
 
-    apiKey: "AIzaSyCSSx_wT7AbaplQmSbcxz923a-0Q6UZ1dA",
-  
-    authDomain: "workshop-61e8e.firebaseapp.com",
-  
-    projectId: "workshop-61e8e",
-  
-    storageBucket: "workshop-61e8e.appspot.com",
-  
-    messagingSenderId: "55259303361",
-  
-    appId: "1:55259303361:web:38377a939360a5baabb340"
-  
+    authDomain: "testing-27f8f.firebaseapp.com",
+
+    projectId: "testing-27f8f",
+
+    storageBucket: "testing-27f8f.appspot.com",
+
+    messagingSenderId: "759093069131",
+
+    appId: "1:759093069131:web:530b713c512bb38eced4ce",
+
+    measurementId: "G-EKVM8LJGC5",
 };
-  
-
 
 // initialize Firebase with the config above
 const app = initializeApp(firebaseConfig);
 
+// initialize firestore database service
+const db = getFirestore();
 
-// initialize firestore database
-const db = getFirestore(app);
+// initialize authentication service
+const auth = getAuth();
 
-
-
-// initialize firebase authentication
-const auth = getAuth(app);
-
-
-
-// export the database and the authentication objects
-
-export { db, auth }
+export { auth, db };
