@@ -9,7 +9,10 @@ import {
     RecaptchaVerifier,
 
 
-    signInWithPhoneNumber
+    signInWithPhoneNumber,
+
+    sendPasswordResetEmail
+
 } from "firebase/auth";
 
 
@@ -50,14 +53,17 @@ const signUp = async () => {
 
         await sendEmailVerification(auth.currentUser);
 
-        // onAuthStateChanged(auth, (user)=>{
+        onAuthStateChanged(auth, (user)=>{
 
-        //     if(user !== null) {
-        //         //redirect if user is authenticated
-        //         window.location = "/"
-        //     }
+            if(user !== null) {
+                //redirect if user is authenticated
+                window.location = "/"
+            }
 
-        // })
+        })
+
+
+        
     } catch (error) {
         alert(error.message);
     }
@@ -85,14 +91,16 @@ const signin = async () => {
             password
         );
 
-        // onAuthStateChanged(auth, (user)=>{
+        onAuthStateChanged(auth, (user)=>{
 
-        //     if(user !== null) {
-        //         //redirect if user is authenticated
-        //         window.location = "/"
-        //     }
+            if(user !== null) {
+                //redirect if user is authenticated
+                window.location = "/"
+            }
 
-        // })
+        })
+
+
     } catch (error) {
         alert(error.message);
     }
@@ -104,6 +112,16 @@ const signUpWithGoogle = async () => {
 
     try {
         await signInWithPopup(auth, provider);
+
+
+        onAuthStateChanged(auth, (user)=>{
+
+            if(user !== null) {
+                //redirect if user is authenticated
+                window.location = "/"
+            }
+
+        })
 
         console.log("after google auth: ", auth.currentUser);
     } catch (error) {
@@ -152,6 +170,16 @@ const confirmVerificationCode = async () => {
     try {
         const result = await confirmationResult.confirm(code);
 
+        
+        onAuthStateChanged(auth, (user)=>{
+
+            if(user !== null) {
+                //redirect if user is authenticated
+                window.location = "/"
+            }
+
+        })
+
         console.log(result.user);
         
     } catch (error) {
@@ -169,7 +197,17 @@ const resetPassword = async () => {
         alert("please enter the required fields");
         return;
     }
+
+
+    await sendPasswordResetEmail(auth, email);
+
+    alert("email sent")
+
+
 };
+
+
+
 
 document.getElementById("signup-btn").addEventListener("click", signUp);
 

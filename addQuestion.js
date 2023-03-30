@@ -1,7 +1,7 @@
 import { db } from "./firebase";
-import { addDoc, collection, getDoc, getDocs, query, where,  } from "firebase/firestore";
+import { addDoc, collection } from "firebase/firestore";
 
-import data from "./data";
+import data from "./data.js";
 
 let addBtn = document.querySelector("#addBtn");
 
@@ -10,7 +10,19 @@ let addBtn = document.querySelector("#addBtn");
 // ONLY RUN ONCE
 const addQuestionsToFirestore = async () => {
 
+
+    // get reference to the quizes collection
+    const quizesColRef = collection(db, "quizes");
+
+    data.forEach( async (question) => {
+        await addDoc(quizesColRef, question);
+    })
+
+    console.log("data added")
+
 }
+
+//addQuestionsToFirestore();
 
 
 addBtn.addEventListener("click", async () => {
@@ -45,11 +57,16 @@ addBtn.addEventListener("click", async () => {
     }
 
 
-
-
-
     // TODO: add the question to the database
 
+    // get reference to the quizes collection
+    const quizesColRef = collection(db, "quizes");
+
+    await addDoc(quizesColRef, {
+        title_question: title,
+        choices: choices,
+        answer: correctAnswer
+    })
 
 
     alert("question has been added")

@@ -1,3 +1,16 @@
+import { onAuthStateChanged, signOut } from "firebase/auth";
+import { db, auth } from "./firebase.js";
+
+
+
+// check if we are authorized
+onAuthStateChanged(auth, (user)=>{
+    if(user === null) {     // if there is no logged in user
+        window.location = "/auth.html"
+    }
+})
+
+
 
 
 let questions = "";
@@ -38,6 +51,8 @@ const displayQuestions = (data) => {
     const Qcontainer = document.querySelector(".questions");
     Qcontainer.innerHTML = `${questions}\n`;
 
+
+
 }
 
 
@@ -48,6 +63,10 @@ const displayQuestions = (data) => {
 const signoutBtn = document.querySelector(".signout-btn")
 signoutBtn.addEventListener("click", async ()=>{
     //sign out
+
+    await signOut(auth);
+
+
 })
 
 
