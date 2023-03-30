@@ -5,6 +5,7 @@ This is the repository of the workshop's content.
 ### How to run:
 
 1. Make sure you have Node.js installed
+
 2. Clone the repository:
    
    ```
@@ -23,6 +24,10 @@ This is the repository of the workshop's content.
    ```bash
    npm start       # it runs "vite" on the directory
    ```
+
+### Slides
+
+- You can find the workshop's slides I've used in []()
 
 ### Acknowledgments
 
